@@ -1,0 +1,49 @@
+[project]
+name = "eternal_cherry"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.18.0",
+    "google-genai>=1.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1", # Type checking
+    "ruff>=0.9.4",  # Linting and formatting
+]
+
+[tool.ruff.lint]
+select = ["ALL"] # Enable all linter rules
+preview = true   # Enable rules that are in beta
+ignore = [
+    # [suspicious-non-cryptographic-random-usage]
+    # `random` is not used for cryptographic purposes most of the time,
+    # so using it instead of the `secrets` module is usually fine.
+    "S311",
+
+    # [flake8-copyright]
+    # I don't use copyright headers in my code, so this ruleset is unneeded.
+    "CPY", 
+
+    # [line-too-long]
+    # When making the line shorter is possible, ruff's formatter
+    # automatically takes care of that, so warning about long lines is
+    # unnecessary.
+    "E501", 
+
+    # [missing-todo-author], [missing-todo-link]
+    # I don't use TODO tags for repository issue tracking, so I don't need
+    # author and issue links on them.
+    "TD002", 
+    "TD003", 
+
+    "D", "RUF001", "T201"
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+strict = true # Enforce type annotations
+disable_error_code = "name-defined" # Ruff already reports undefined variables

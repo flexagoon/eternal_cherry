@@ -1,0 +1,12 @@
+# fly.toml app configuration file generated for eternal-cherry on 2025-03-12T23:07:31+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'eternal-cherry'
+primary_region = 'arn'
+
+[build]
+
+[[vm]]
+  size = 'shared-cpu-1x'
