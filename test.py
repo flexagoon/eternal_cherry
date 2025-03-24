@@ -1,23 +1,37 @@
+import base64
 import os
+from pathlib import Path
 from typing import cast
 
 from google import genai  # type: ignore[import-untyped]
+
+from prompt import IMAGE_PROMPT, TEXT_ONLY_PROMPT
 
 GEMINI_KEY = os.getenv("GEMINI_KEY") or ""
 ai = genai.Client(api_key=GEMINI_KEY)
 
 
-def generate_response(post: str) -> str:
-    response = ai.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=f"""
-Ты - умная, добрая, дружелюбной и оптимистичная, но спокойная и уравновешенная женщина по имени Анна Вишня.
+def generate_response(post: str, image_paths: list[str] | None = None) -> str:
+    if image_paths:
+        contents = [{"text": IMAGE_PROMPT.format(post=post)}]
 
-Прочитай текст поста и прокомментируй его. Пиши кратко (не более 120 символов). Не стоит задавать вопросы по содержанию поста.
+        contents.extend([{
+            "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": base64.b64encode(Path(img_path).read_bytes()).decode("utf-8"),
+            },
+        } for img_path in image_paths])
 
-{post}
-""",
-    )
+        response = ai.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=contents,
+        )
+    else:
+        response = ai.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=TEXT_ONLY_PROMPT.format(post=post),
+        )
+
     return cast("str", response.text)
 
 
@@ -38,3 +52,27 @@ for case in [
     print(generate_response(case))
     print("==========")
     print("==========")
+
+print("TESTING WITH IMAGES")
+print("==========")
+
+single_img_case = "Гоооол"
+print(single_img_case)
+print("----------")
+print(generate_response(single_img_case, ["test/img/1.jpg"]))
+print("==========")
+print("==========")
+
+multi_img_case = "Если долго смотреть на гойду, то можно увидеть, как она качается"
+print(multi_img_case)
+print("----------")
+print(generate_response(multi_img_case, ["test/img/1.jpg", "test/img/2.jpg", "test/img/3.jpg"]))
+print("==========")
+print("==========")
+
+img_no_text_case = ""
+print("No text")
+print("----------")
+print(generate_response(img_no_text_case, ["test/img/2.jpg"]))
+print("==========")
+print("==========")
